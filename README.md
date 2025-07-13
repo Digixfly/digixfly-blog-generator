@@ -137,7 +137,7 @@ Contributions are welcome and encouraged. Please:
 ## Support and Contact
 
 For questions, issues, or collaboration:
-- **LinkedIn**: [Aftab Ali](https://www.linkedin.com/in/aftabaliq/)
+- **LinkedIn**: [Aftab M.](https://www.linkedin.com/in/aftabaliq/)
 - **Website**: [Digixfly.com](https://digixfly.com)
 - **GitHub Issues**: Use the Issues tab for bug reports and feature requests
 
