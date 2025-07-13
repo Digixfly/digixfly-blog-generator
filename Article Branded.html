@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natural Flow Blog Article Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 20px;
+            width: 100px;
+            height: 100px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" x="50" text-anchor="middle" dominant-baseline="middle" font-size="60" fill="%23667eea">D</text></svg>') no-repeat center;
+            opacity: 0.1;
+            z-index: 1;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+            position: relative;
+        }
+
+        .form-section::after {
+            content: 'Digixfly';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 0.8rem;
+            color: #667eea;
+            opacity: 0.6;
+            font-weight: 600;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .required {
+            color: #ef4444;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #667eea;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .output {
+            margin-top: 30px;
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #e2e8f0;
+            display: none;
+        }
+
+        .output.show {
+            display: block;
+        }
+
+        .output h2 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .article-content {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            font-family: Georgia, serif;
+            line-height: 1.8;
+            border: 1px solid #e5e7eb;
+        }
+
+        .article-content h1 {
+            color: #1f2937;
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .article-content h2 {
+            color: #374151;
+            font-size: 1.8rem;
+            margin: 30px 0 15px 0;
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .article-content h3 {
+            color: #1f2937;
+            font-size: 1.4rem;
+            margin: 25px 0 12px 0;
+        }
+
+        .article-content p {
+            margin-bottom: 15px;
+            color: #374151;
+            font-size: 1.1rem;
+        }
+
+        .article-content ul, .article-content ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+
+        .article-content li {
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .copy-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .copy-btn {
+            padding: 10px 20px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #059669;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #fecaca;
+        }
+
+        .word-count {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 600;
+            color: #0369a1;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Digixfly Blog Generator</h1>
+            <p>Create comprehensive, naturally flowing SEO articles</p>
+            <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">
+                    Powered by <strong>Digixfly</strong> • 
+                    <a href="https://digixfly.com" target="_blank" style="color: white; text-decoration: none;">🌐 Digixfly.com</a> • 
+                    <a href="https://www.linkedin.com/in/aftabaliq/" target="_blank" style="color: white; text-decoration: none;">👔 LinkedIn</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <form id="articleForm">
+                <div class="form-section">
+                    <h2 class="section-title">🔑 API Configuration</h2>
+                    <div class="form-group">
+                        <label for="apiKey">OpenAI API Key <span class="required">*</span></label>
+                        <input type="password" id="apiKey" placeholder="sk-..." required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2 class="section-title">📝 Article Settings</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="topic">Main Topic/Title <span class="required">*</span></label>
+                            <input type="text" id="topic" placeholder="e.g., Best Social Media Marketing Tips" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="targetKeyword">Primary Keyword <span class="required">*</span></label>
+                            <input type="text" id="targetKeyword" placeholder="e.g., social media marketing" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="wordCount">Target Word Count</label>
+                            <select id="wordCount">
+                                <option value="2000">2000 words</option>
+                                <option value="2500">2500 words</option>
+                                <option value="3000">3000 words</option>
+                                <option value="3500">3500 words</option>
+                                <option value="4000">4000 words</option>
+                                <option value="5000">5000 words</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tone">Writing Tone</label>
+                            <select id="tone">
+                                <option value="professional">Professional</option>
+                                <option value="conversational">Conversational</option>
+                                <option value="friendly">Friendly</option>
+                                <option value="authoritative">Authoritative</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="audience">Target Audience <span class="required">*</span></label>
+                            <input type="text" id="audience" placeholder="e.g., Small business owners, Marketers" required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="hookType">Introductory Hook Type</label>
+                            <select id="hookType">
+                                <option value="question">Question</option>
+                                <option value="statistic">Statistical or Fact</option>
+                                <option value="quotation">Quotation</option>
+                                <option value="anecdotal">Anecdotal or Story</option>
+                                <option value="personal">Personal or Emotional</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="hookDescription">Hook Description</label>
+                            <textarea id="hookDescription" placeholder="Enter the type of hook for the article's opening sentence..."></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="additionalInfo">Additional Requirements</label>
+                            <textarea id="additionalInfo" placeholder="Any specific points you want covered..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">Generate Article</button>
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
+                </div>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <div id="loadingText">Generating your comprehensive article...</div>
+            </div>
+
+            <div class="output" id="output">
+                <h2>📄 Generated Article</h2>
+                <div class="word-count" id="wordCount"></div>
+                <div class="article-content" id="articleContent"></div>
+                <div class="copy-actions">
+                    <button class="copy-btn" onclick="copyHTML()">Copy HTML</button>
+                    <button class="copy-btn" onclick="copyText()">Copy Text</button>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; text-align: center; border: 1px solid #e9ecef;">
+                    <p style="margin: 0; color: #6c757d; font-size: 0.9rem;">
+                        ⚡ Generated by <strong>Digixfly Blog Generator</strong> • 
+                        <a href="https://digixfly.com" target="_blank" style="color: #667eea; text-decoration: none;">Visit Digixfly.com</a> • 
+                        <a href="https://www.linkedin.com/in/aftabaliq/" target="_blank" style="color: #667eea; text-decoration: none;">Connect on LinkedIn</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Form submission handler
+        document.getElementById('articleForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                apiKey: document.getElementById('apiKey').value,
+                topic: document.getElementById('topic').value,
+                targetKeyword: document.getElementById('targetKeyword').value,
+                wordCount: document.getElementById('wordCount').value,
+                tone: document.getElementById('tone').value,
+                audience: document.getElementById('audience').value,
+                hookType: document.getElementById('hookType').value,
+                hookDescription: document.getElementById('hookDescription').value,
+                additionalInfo: document.getElementById('additionalInfo').value
+            };
+
+            // Validate required fields
+            if (!formData.apiKey || !formData.topic || !formData.targetKeyword || !formData.audience) {
+                showError('Please fill in all required fields (API Key, Topic, Primary Keyword, and Target Audience)');
+                return;
+            }
+
+            showLoading();
+            
+            try {
+                const article = await generateNaturalFlowArticle(formData);
+                displayArticle(article);
+            } catch (error) {
+                console.error('Error:', error);
+                hideLoading();
+                showError('Error generating article: ' + error.message);
+            }
+        });
+
+        async function generateNaturalFlowArticle(formData) {
+            const prompt = `
+            You are an expert content writer with 15+ years of experience. Write a comprehensive, naturally flowing blog article about "${formData.topic}" that targets the keyword "${formData.targetKeyword}".
+
+            ### CRITICAL INSTRUCTIONS:
+            1. Write this as ONE COHESIVE ARTICLE - not separate sections with individual conclusions
+            2. Each section should flow naturally into the next without feeling like separate mini-articles
+            3. Avoid repetitive phrases like "In conclusion" or "To summarize" at the end of each section
+            4. Make it feel like a natural conversation, not an AI-generated piece
+            5. Target ${formData.wordCount} words total - THIS IS MANDATORY
+            6. Use ${formData.tone} tone throughout
+            7. Write for ${formData.audience}
+            8. Never mention "Digixfly" anywhere in the content
+            9. FORMAT EVERYTHING IN PROPER HTML MARKUP
+
+            ### HTML STRUCTURE REQUIREMENTS:
+            - Use proper HTML tags: <h1>, <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>
+            - Create 6-8 main H2 sections with multiple H3 subsections
+            - Each H2 section should be 400-600 words minimum
+            - Use bullet points, numbered lists, and formatting for readability
+            - Include <strong> and <em> tags for emphasis
+
+            ### ARTICLE STRUCTURE (flowing naturally):
+
+            **<h1>Title:</h1>** Create an engaging, SEO-optimized title with the primary keyword
+
+            **<h2>Introduction Section (400-500 words):</h2>**
+            - Start with a ${formData.hookType} hook: ${formData.hookDescription || 'Create an engaging opener'}
+            - Naturally introduce the problem/topic
+            - Preview what readers will learn (without being too formal)
+            - Use primary keyword naturally
+            - Format in multiple <p> tags
+
+            **<h2>Understanding the Core Problem (500-600 words):</h2>**
+            - Deep dive into the main issue
+            - Why this problem exists and affects ${formData.audience}
+            - Statistics, examples, or real-world scenarios
+            - Multiple <h3> subsections
+            - Use <ul> or <ol> for lists
+
+            **<h2>Why Traditional Solutions Fall Short (500-600 words):</h2>**
+            - Analyze common approaches that don't work
+            - Explain the limitations and gaps
+            - Set up your solution as the better alternative
+            - Include specific examples and case studies
+
+            **<h2>The Modern Solution: [Your Approach] (600-700 words):</h2>**
+            - Detailed explanation of your recommended approach
+            - Why this method is superior
+            - Benefits and expected outcomes
+            - Real-world applications and examples
+            - Multiple <h3> subsections with specific tactics
+
+            **<h2>Step-by-Step Implementation Guide (700-800 words):</h2>**
+            - Comprehensive, actionable steps
+            - Each step should be detailed and specific
+            - Include tips, warnings, and best practices
+            - Use <ol> for numbered steps and <ul> for supporting points
+            - Multiple <h3> subsections for different aspects
+
+            **<h2>Advanced Strategies and Pro Tips (500-600 words):</h2>**
+            - Next-level tactics for better results
+            - Common mistakes to avoid
+            - Optimization techniques
+            - Expert insights and recommendations
+
+            **<h2>Measuring Success and Long-term Results (400-500 words):</h2>**
+            - How to track progress and results
+            - Key metrics to monitor
+            - Long-term benefits and maintenance
+            - Success stories or case studies
+
+            **<h2>Conclusion and Next Steps (300-400 words):</h2>**
+            - Recap key points naturally
+            - Strong call-to-action
+            - Final motivational statement
+            - Encourage implementation
+
+            ### WRITING REQUIREMENTS:
+            - MINIMUM ${formData.wordCount} words - expand each section extensively
+            - Write like you're having a conversation with a friend
+            - Use contractions (don't, can't, won't)
+            - Vary sentence length for rhythm
+            - Use transitional phrases to connect ideas smoothly
+            - Include rhetorical questions naturally
+            - Use active voice predominantly
+            - No repetitive section endings or conclusions
+
+            ### SEO OPTIMIZATION:
+            - Use primary keyword "${formData.targetKeyword}" naturally (1.5-2% density)
+            - Include semantic keywords and related terms
+            - Use H2 and H3 headers with keyword variations
+            - Write compelling meta-friendly introduction
+            - Include actionable tips and examples
+
+            ### ADDITIONAL REQUIREMENTS:
+            ${formData.additionalInfo || 'None specified'}
+
+            IMPORTANT: Return the complete article in full HTML format with proper markup. Do not truncate or summarize. Write the full ${formData.wordCount} words with detailed explanations, examples, and comprehensive coverage of the topic.
+            `;
+
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${formData.apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4o',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: `You are a world-class content writer and SEO expert. Your writing feels natural, conversational, and authoritative. You create comprehensive articles that flow seamlessly from one point to the next, avoiding the choppy, section-by-section structure that screams "AI-generated." 
+
+                            Key principles:
+                            - Write as ONE flowing article, not separate sections
+                            - Use natural transitions between ideas
+                            - Avoid repetitive conclusions at the end of each section
+                            - Write conversationally but professionally
+                            - Include specific examples and actionable advice
+                            - Make every paragraph valuable and engaging
+                            - Vary sentence structure and length
+                            - Use the active voice predominantly
+                            - ALWAYS format in proper HTML markup with headers, paragraphs, lists, and emphasis tags
+                            - Write comprehensive, detailed content that meets the specified word count`
+                        },
+                        {
+                            role: 'user',
+                            content: prompt
+                        }
+                    ],
+                    max_tokens: 4000,
+                    temperature: 0.7
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || 'Failed to generate article');
+            }
+
+            const data = await response.json();
+            return data.choices[0].message.content;
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('output').classList.remove('show');
+            document.getElementById('loadingText').textContent = 'Generating your comprehensive article...';
+            document.getElementById('loading').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Add footer to HTML output
+        function displayArticle(article) {
+            hideLoading();
+            
+            // Clean up the article content
+            let cleanedArticle = article
+                .replace(/```html|```/g, '')
+                .replace(/^\s*<html>.*?<body[^>]*>/is, '')
+                .replace(/<\/body>.*?<\/html>\s*$/is, '')
+                .trim();
+            
+            // Add Digixfly footer to the article content
+            cleanedArticle += `
+            <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 10px; text-align: center; border: 2px solid #e9ecef;">
+                <p style="margin: 0; color: #6c757d; font-size: 0.9rem;">
+                    <strong>Article generated by Digixfly Blog Generator</strong><br>
+                    <a href="https://digixfly.com" target="_blank" style="color: #667eea; text-decoration: none;">🌐 Digixfly.com</a> | 
+                    <a href="https://www.linkedin.com/in/aftabaliq/" target="_blank" style="color: #667eea; text-decoration: none;">👔 LinkedIn: Aftab Ali</a>
+                </p>
+            </div>
+            `;
+            
+            // Count words
+            const wordCount = cleanedArticle.replace(/<[^>]*>/g, '').split(/\s+/).length;
+            
+            document.getElementById('articleContent').innerHTML = cleanedArticle;
+            document.getElementById('wordCount').textContent = `Word Count: ${wordCount} words`;
+            document.getElementById('output').classList.add('show');
+            
+            // Scroll to the output
+            document.getElementById('output').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showError(message) {
+            // Remove existing error messages
+            const existingError = document.querySelector('.error');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            
+            const form = document.getElementById('articleForm');
+            form.parentNode.insertBefore(errorDiv, form.nextSibling);
+            
+            // Remove error after 8 seconds
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 8000);
+        }
+
+        function copyHTML() {
+            const content = document.getElementById('articleContent').innerHTML;
+            copyToClipboard(content, 'HTML copied to clipboard!');
+        }
+
+        function copyText() {
+            const content = document.getElementById('articleContent').innerText;
+            copyToClipboard(content, 'Text copied to clipboard!');
+        }
+
+        function copyToClipboard(content, successMessage) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(content).then(() => {
+                    showCopySuccess(successMessage);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    fallbackCopy(content, successMessage);
+                });
+            } else {
+                fallbackCopy(content, successMessage);
+            }
+        }
+
+        function fallbackCopy(content, successMessage) {
+            const textarea = document.createElement('textarea');
+            textarea.value = content;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showCopySuccess(successMessage);
+        }
+
+        function showCopySuccess(message) {
+            const copyBtns = document.querySelectorAll('.copy-btn');
+            copyBtns.forEach(btn => {
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                btn.style.background = '#10b981';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#10b981';
+                }, 2000);
+            });
+        }
+
+        function clearForm() {
+            document.getElementById('articleForm').reset();
+            document.getElementById('output').classList.remove('show');
+        }
+    </script>
+</body>
+</html>
